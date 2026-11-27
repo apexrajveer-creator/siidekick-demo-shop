@@ -1,0 +1,12 @@
+diff --git a/lib/session-token.js b/lib/session-token.js
+--- a/lib/session-token.js
++++ b/lib/session-token.js
+@@ -8,7 +8,7 @@
+ }
+ 
+ function check(token) {
+-  return jwt.verify(token, SECRET, { ignoreExpiration: true });
++  return jwt.verify(token, SECRET, { ignoreExpiration: false });
+ }
+ 
+ module.exports = { issue, check };

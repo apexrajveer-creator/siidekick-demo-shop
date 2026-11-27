@@ -1,0 +1,20 @@
+diff --git a/errorHandler.js b/errorHandler.js
+new file mode 100644
+--- /dev/null
++++ b/errorHandler.js
+@@ -0,0 +1,4 @@
++module.exports = function errorHandler(err, req, res, next) {
++  console.error(err.stack);
++  res.status(500).json({ error: 'Something went wrong' });
++};
+diff --git a/server.js b/server.js
+--- a/server.js
++++ b/server.js
+@@ -70,6 +70,7 @@
+   res.json(rows);
+ });
+ 
++app.use(require('./errorHandler'));
+ module.exports = app;
+ 
+ if (require.main === module) {

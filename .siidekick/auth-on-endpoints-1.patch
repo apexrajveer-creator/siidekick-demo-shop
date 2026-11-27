@@ -1,0 +1,31 @@
+diff --git a/auth.js b/auth.js
+new file mode 100644
+--- /dev/null
++++ b/auth.js
+@@ -0,0 +1,15 @@
++// Minimal admin gate: compares Authorization: Bearer <token> with process.env.ADMIN_TOKEN
++// and answers 401 otherwise (also when the variable is unset, so a missing config fails closed).
++// In production replace this shared token with a verified Cognito JWT; this static check only
++// reduces risk while ADMIN_TOKEN is set and kept secret.
++function requireAdmin(req, res, next) {
++  const header = req.get("Authorization") || "";
++  const expected = process.env.ADMIN_TOKEN;
++  const token = header.startsWith("Bearer ") ? header.slice(7) : "";
++  if (!expected || token !== expected) {
++    res.status(401).json({ error: "Unauthorized" });
++    return;
++  }
++  next();
++}
++module.exports = { requireAdmin };
+diff --git a/server.js b/server.js
+--- a/server.js
++++ b/server.js
+@@ -4,6 +4,7 @@
+ const path = require('node:path');
+ 
+ const app = express();
++app.use('/admin', require('./auth').requireAdmin);
+ app.use(['/login', '/signup', '/register', '/reset'], require('./rateLimit')());
+ require('./security')(app);
+ 
