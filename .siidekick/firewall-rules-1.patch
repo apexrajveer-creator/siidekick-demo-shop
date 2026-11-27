@@ -1,0 +1,48 @@
+diff --git a/infra/security-group.yaml b/infra/security-group.yaml
+new file mode 100644
+--- /dev/null
++++ b/infra/security-group.yaml
+@@ -0,0 +1,26 @@
++AWSTemplateFormatVersion: "2010-09-09"
++Description: Security group for the app: HTTPS and HTTP ingress only, no SSH.
++
++Parameters:
++  VpcId:
++    Type: AWS::EC2::VPC::Id
++    Description: VPC to place the security group in
++
++Resources:
++  AppSecurityGroup:
++    Type: AWS::EC2::SecurityGroup
++    Properties:
++      GroupDescription: Allow HTTPS 443 and HTTP 80 from anywhere; SSH stays closed
++      VpcId: !Ref VpcId
++      SecurityGroupIngress:
++        - IpProtocol: tcp
++          FromPort: 443
++          ToPort: 443
++          CidrIp: 0.0.0.0/0
++        - IpProtocol: tcp
++          FromPort: 80
++          ToPort: 80
++          CidrIp: 0.0.0.0/0
++      SecurityGroupEgress:
++        - IpProtocol: "-1"
++          CidrIp: 0.0.0.0/0
+diff --git a/infra/ufw.sh b/infra/ufw.sh
+new file mode 100644
+--- /dev/null
++++ b/infra/ufw.sh
+@@ -0,0 +1,12 @@
++#!/bin/sh
++set -e
++
++# Firewall baseline: deny incoming, allow outgoing, open only HTTP 80/tcp and HTTPS 443/tcp.
++# SSH (port 22) stays closed. To allow SSH from one IP only, run before enabling:
++#   ufw allow from <IP> to any port 22
++
++ufw default deny incoming
++ufw default allow outgoing
++ufw allow 80/tcp
++ufw allow 443/tcp
++ufw --force enable

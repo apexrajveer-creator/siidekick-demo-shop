@@ -4,12 +4,16 @@ const _ = require('lodash');
 const path = require('node:path');
 
 const app = express();
+app.get('/health', (req, res) => res.json({ ok: true }));
+app.use('/admin', require('./auth').requireAdmin);
+app.use(['/login', '/signup', '/register', '/reset'], require('./rateLimit')());
+require('./security')(app);
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN || 'http://localhost:3000');
   next();
 });
 
@@ -30,7 +34,7 @@ addProduct.run('Tote Bag', 199, 20);
 addProduct.run('Sticker Pack', 49, 100);
 addProduct.run('Campus Tee', 199, 15);
 
-const PAYMENT_API_KEY = "pk_demo_9f8a7b6c5d4e3f2a1b0c";
+const PAYMENT_API_KEY = process.env.PAYMENT_API_KEY;
 
 app.get('/', (req, res) => {
   res.send('<h1>CampusKart</h1><p>College fest merch shop.</p>');
@@ -66,6 +70,7 @@ app.get('/admin/users', (req, res) => {
   res.json(rows);
 });
 
+app.use(require('./errorHandler'));
 module.exports = app;
 
 if (require.main === module) {

@@ -1,0 +1,11 @@
+diff --git a/server.js b/server.js
+--- a/server.js
++++ b/server.js
+@@ -4,6 +4,7 @@
+ const path = require('node:path');
+ 
+ const app = express();
++app.get('/health', (req, res) => res.json({ ok: true }));
+ app.use('/admin', require('./auth').requireAdmin);
+ app.use(['/login', '/signup', '/register', '/reset'], require('./rateLimit')());
+ require('./security')(app);
